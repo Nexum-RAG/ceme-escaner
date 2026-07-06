@@ -500,6 +500,20 @@ async function iniciarScanner() {
   await cargarProductos();
   document.getElementById('pantalla-inicio').classList.add('oculta');
   document.getElementById('pantalla-scanner').classList.remove('oculta');
+
+  try {
+    // Pedimos permiso de cámara explícitamente antes de iniciar ZXing
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment' }
+    });
+    // Liberamos el stream inmediatamente — ZXing abre el suyo
+    stream.getTracks().forEach(t => t.stop());
+  } catch(e) {
+    alert('No se pudo acceder a la cámara. Verificá los permisos del navegador.\n\nDetalle: ' + e.message);
+    detenerScanner();
+    return;
+  }
+
   try {
     const hints = new Map();
     hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [
@@ -513,7 +527,7 @@ async function iniciarScanner() {
       if (result && scanning) { scanning = false; procesarScan(result.getText()); }
     });
   } catch(e) {
-    alert('No se pudo acceder a la cámara. Verificá los permisos del navegador.');
+    alert('Error al iniciar el escáner: ' + e.message);
     detenerScanner();
   }
 }
