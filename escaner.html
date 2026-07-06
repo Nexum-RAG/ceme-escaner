@@ -527,6 +527,20 @@ async function iniciarScanner() {
     ]);
     codeReader = new ZXing.BrowserMultiFormatReader(hints);
     scanning = true;
+    // Intentar aplicar zoom 2x si el dispositivo lo soporta
+try {
+  const videoTrack = (await navigator.mediaDevices.getUserMedia({
+    video: { facingMode: 'environment' }
+  })).getVideoTracks()[0];
+  const capabilities = videoTrack.getCapabilities();
+  if (capabilities.zoom) {
+    const zoomMin = capabilities.zoom.min;
+    const zoomMax = capabilities.zoom.max;
+    const zoom2x = Math.min(zoomMin * 2.5, zoomMax);
+    await videoTrack.applyConstraints({ advanced: [{ zoom: zoom2x }] });
+  }
+  videoTrack.stop();
+} catch(z) { /* zoom no soportado, continúa sin él */ }
     await codeReader.decodeFromConstraints(
   { video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } } },
   'video',
