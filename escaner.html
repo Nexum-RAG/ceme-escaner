@@ -504,8 +504,12 @@ async function iniciarScanner() {
   try {
     // Pedimos permiso de cámara explícitamente antes de iniciar ZXing
     const stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'environment' }
-    });
+  video: {
+    facingMode: 'environment',
+    width: { ideal: 1920 },
+    height: { ideal: 1080 }
+  }
+});
     // Liberamos el stream inmediatamente — ZXing abre el suyo
     stream.getTracks().forEach(t => t.stop());
   } catch(e) {
@@ -523,7 +527,10 @@ async function iniciarScanner() {
     ]);
     codeReader = new ZXing.BrowserMultiFormatReader(hints);
     scanning = true;
-    await codeReader.decodeFromVideoDevice(null, 'video', (result, err) => {
+    await codeReader.decodeFromConstraints(
+  { video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } } },
+  'video',
+  (result, err) => {
       if (result && scanning) { scanning = false; procesarScan(result.getText()); }
     });
   } catch(e) {
