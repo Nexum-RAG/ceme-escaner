@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>CEME Accesorios · Panel de administración</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500&display=swap');
+
+  :root {
+    --oro:    #C9A84C;
+    --carbon: #1C1A18;
+    --fondo:  #F5F3EF;
+    --gris:   #8A8680;
+    --blanco: #FAFAF8;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    height: 100%;
+    background: var(--fondo);
+    font-family: 'Jost', sans-serif;
+    color: var(--carbon);
+  }
+
+  .contenedor {
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 32px 24px;
+  }
+
+  h1 {
+    font-size: 20px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+
+  .subtitulo {
+    font-size: 12.5px;
+    font-weight: 300;
+    color: var(--gris);
+    text-align: center;
+    line-height: 1.6;
+    margin-bottom: 32px;
+  }
+
+  form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  input[type="file"] {
+    width: 100%;
+    font-family: 'Jost', sans-serif;
+    font-size: 12px;
+    font-weight: 300;
+    color: var(--carbon);
+    background: white;
+    border: 1px solid rgba(201,168,76,0.35);
+    padding: 14px;
+    border-radius: 2px;
+  }
+
+  button {
+    width: 100%;
+    padding: 16px 24px;
+    background: var(--carbon);
+    color: var(--oro);
+    border: none;
+    font-family: 'Jost', sans-serif;
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  button:active { background: #2e2b28; }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .mensaje {
+    margin-top: 20px;
+    font-size: 12.5px;
+    font-weight: 400;
+    text-align: center;
+    letter-spacing: 0.02em;
+    min-height: 18px;
+  }
+
+  .mensaje.ok  { color: #3a8a4c; }
+  .mensaje.err { color: #b03a3a; }
+</style>
+</head>
+<body>
+  <div class="contenedor">
+    <h1>Panel de administración — CEME</h1>
+    <p class="subtitulo">Cargá el catálogo actualizado de Contabilium. El archivo nuevo pisa el anterior.</p>
+
+    <form id="form-upload">
+      <input type="file" id="input-excel" name="excel" accept=".xlsx" required>
+      <button type="submit" id="btn-cargar">Cargar catálogo</button>
+    </form>
+
+    <p class="mensaje" id="mensaje"></p>
+  </div>
+
+<script>
+  const form = document.getElementById('form-upload');
+  const inputExcel = document.getElementById('input-excel');
+  const btnCargar = document.getElementById('btn-cargar');
+  const mensaje = document.getElementById('mensaje');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    if (!inputExcel.files.length) return;
+
+    mensaje.textContent = '';
+    mensaje.className = 'mensaje';
+    btnCargar.disabled = true;
+    btnCargar.textContent = 'Cargando...';
+
+    const formData = new FormData();
+    formData.append('excel', inputExcel.files[0]);
+
+    try {
+      const res = await fetch('/api/admin/upload', {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+
+      if (res.ok && data.ok) {
+        mensaje.textContent = `✓ ${data.total} productos cargados correctamente`;
+        mensaje.className = 'mensaje ok';
+        form.reset();
+      } else {
+        mensaje.textContent = data.error || 'Ocurrió un error al cargar el archivo.';
+        mensaje.className = 'mensaje err';
+      }
+    } catch (err) {
+      mensaje.textContent = 'No se pudo conectar con el servidor.';
+      mensaje.className = 'mensaje err';
+    } finally {
+      btnCargar.disabled = false;
+      btnCargar.textContent = 'Cargar catálogo';
+    }
+  });
+</script>
+</body>
+</html>
