@@ -4,15 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>CEME Accesorios · Consulta de precio</title>
-<script>
-  window.ZXingReady = new Promise((resolve) => {
-    const s = document.createElement('script');
-    s.src = 'https://cdn.jsdelivr.net/npm/@zxing/library@0.20.1/umd/index.min.js';
-    s.onload = () => resolve();
-    s.onerror = () => resolve();
-    document.head.appendChild(s);
-  });
-</script>
+<script src="/zxing.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500&display=swap');
 
@@ -511,8 +503,6 @@ async function iniciarScanner() {
 
   try {
     // Pedimos permiso de cámara explícitamente antes de iniciar ZXing
-    await window.ZXingReady;
-if (typeof ZXing === 'undefined') throw new Error('Librería de escáner no disponible');
     const stream = await navigator.mediaDevices.getUserMedia({
       video: { facingMode: 'environment' }
     });
