@@ -559,6 +559,11 @@ function procesarScan(sku) {
   errorMsg.classList.remove('visible');
   const producto = productos[sku];
   if (producto) {
+    // Parar la cámara y mostrar fondo negro limpio
+    if (codeReader) { codeReader.reset(); }
+    const video = document.getElementById('video');
+    video.srcObject = null;
+
     document.getElementById('resultado-sku').textContent    = 'SKU · ' + sku;
     document.getElementById('resultado-nombre').textContent = producto.nombre;
     document.getElementById('resultado-precio').textContent = '$' + Number(producto.precio).toLocaleString('es-AR');
@@ -569,9 +574,26 @@ function procesarScan(sku) {
   }
 }
 
-function nuevoScan() {
+async function nuevoScan() {
   document.getElementById('resultado-overlay').classList.remove('visible');
   scanning = true;
+  // Reiniciar la cámara
+  try {
+    const hints = new Map();
+    hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [
+      ZXing.BarcodeFormat.CODE_128,
+      ZXing.BarcodeFormat.EAN_13,
+      ZXing.BarcodeFormat.EAN_8
+    ]);
+    codeReader = new ZXing.BrowserMultiFormatReader(hints);
+    await codeReader.decodeFromConstraints(
+      { video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } } },
+      'video',
+      (result, err) => {
+        if (result && scanning) { scanning = false; procesarScan(result.getText()); }
+      }
+    );
+  } catch(e) { console.error(e); }
 }
 
 function detenerScanner() {
