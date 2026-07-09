@@ -14,7 +14,8 @@ const upload = multer({ storage: multer.memoryStorage() });
 app.use(cors());
 app.use(express.static(__dirname));
 app.get('/zxing.js', (req, res) => {
-  res.sendFile(require.resolve('@zxing/library/umd/index.min.js'));
+  const zxingPath = path.join(__dirname, 'node_modules/@zxing/library/umd/index.min.js');
+  res.sendFile(zxingPath);
 });
 
 app.get('/', (req, res) => {
