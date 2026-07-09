@@ -1,1 +1,5 @@
- 
+ echo node_modules/ > .gitignore
+git rm -r --cached node_modules
+git add .
+git commit -m "fix zxing cdn"
+git push
