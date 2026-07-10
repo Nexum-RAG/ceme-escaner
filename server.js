@@ -7,7 +7,10 @@ const XLSX = require('xlsx');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const PRODUCTOS_PATH = path.join(__dirname, 'productos.json');
+const PRODUCTOS_PATH = path.join(__dirname, 'data', 'productos.json');
+const DATA_DIR = path.join(__dirname, 'data');
+if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR);
+if (!fs.existsSync(PRODUCTOS_PATH)) fs.writeFileSync(PRODUCTOS_PATH, '{}');
 
 const upload = multer({ storage: multer.memoryStorage() });
 
